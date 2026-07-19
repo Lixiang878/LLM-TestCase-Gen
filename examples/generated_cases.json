@@ -8,24 +8,24 @@
       "a": 1,
       "b": 1
     },
-    "expected": "Returns the expected nominal result.",
+    "expected": "Returns 1.0.",
     "assertions": [
-      "result == 1"
+      "result == 1.0"
     ],
     "provider": "mock"
   },
   {
-    "id": "05030eb6d74a",
+    "id": "ef6974803498",
     "target": "divide",
     "kind": "boundary",
     "description": "Boundary input for divide (zero / empty edge).",
     "inputs": {
       "a": 0,
-      "b": 0
+      "b": 1
     },
-    "expected": "Handles the boundary without error.",
+    "expected": "Returns 0.0.",
     "assertions": [
-      "result is not None"
+      "result == 0.0"
     ],
     "provider": "mock"
   },
@@ -33,15 +33,13 @@
     "id": "6d5e7115f9d0",
     "target": "divide",
     "kind": "exception",
-    "description": "Invalid input raises for divide.",
+    "description": "Invalid input raises for divide. (raised TypeError).",
     "inputs": {
       "a": null,
       "b": null
     },
-    "expected": "Raises ValueError (or equivalent).",
-    "assertions": [
-      "with pytest.raises(ValueError): func(**inputs)"
-    ],
+    "expected": "Raises TypeError.",
+    "assertions": [],
     "provider": "mock"
   },
   {
@@ -53,9 +51,9 @@
       "a": 2,
       "b": 2
     },
-    "expected": "Returns a consistent result for the variant.",
+    "expected": "Returns 1.0.",
     "assertions": [
-      "result is not None"
+      "result == 1.0"
     ],
     "provider": "mock"
   },
@@ -68,9 +66,9 @@
       "a": 3,
       "b": 3
     },
-    "expected": "Returns a consistent result for the variant.",
+    "expected": "Returns 1.0.",
     "assertions": [
-      "result is not None"
+      "result == 1.0"
     ],
     "provider": "mock"
   },
@@ -84,7 +82,7 @@
       "lo": 1,
       "hi": 1
     },
-    "expected": "Returns the expected nominal result.",
+    "expected": "Returns 1.",
     "assertions": [
       "result == 1"
     ],
@@ -100,9 +98,9 @@
       "lo": 0,
       "hi": 0
     },
-    "expected": "Handles the boundary without error.",
+    "expected": "Returns 0.",
     "assertions": [
-      "result is not None"
+      "result == 0"
     ],
     "provider": "mock"
   },
@@ -110,16 +108,14 @@
     "id": "3a4eadd29f2b",
     "target": "clamp",
     "kind": "exception",
-    "description": "Invalid input raises for clamp.",
+    "description": "Invalid input raises for clamp. (raised TypeError).",
     "inputs": {
       "x": null,
       "lo": null,
       "hi": null
     },
-    "expected": "Raises ValueError (or equivalent).",
-    "assertions": [
-      "with pytest.raises(ValueError): func(**inputs)"
-    ],
+    "expected": "Raises TypeError.",
+    "assertions": [],
     "provider": "mock"
   },
   {
@@ -132,9 +128,9 @@
       "lo": 2,
       "hi": 2
     },
-    "expected": "Returns a consistent result for the variant.",
+    "expected": "Returns 2.",
     "assertions": [
-      "result is not None"
+      "result == 2"
     ],
     "provider": "mock"
   },
@@ -148,9 +144,9 @@
       "lo": 3,
       "hi": 3
     },
-    "expected": "Returns a consistent result for the variant.",
+    "expected": "Returns 3.",
     "assertions": [
-      "result is not None"
+      "result == 3"
     ],
     "provider": "mock"
   },
@@ -166,108 +162,84 @@
         3
       ]
     },
-    "expected": "Returns the expected nominal result.",
-    "assertions": [
-      "result == [1, 2, 3]"
-    ],
-    "provider": "mock"
-  },
-  {
-    "id": "a5614a5830e0",
-    "target": "first",
-    "kind": "boundary",
-    "description": "Boundary input for first (zero / empty edge).",
-    "inputs": {
-      "items": []
-    },
-    "expected": "Handles the boundary without error.",
-    "assertions": [
-      "result is not None"
-    ],
-    "provider": "mock"
-  },
-  {
-    "id": "cb950d59ad4e",
-    "target": "first",
-    "kind": "exception",
-    "description": "Invalid input raises for first.",
-    "inputs": {
-      "items": "not-a-list"
-    },
-    "expected": "Raises ValueError (or equivalent).",
-    "assertions": [
-      "with pytest.raises(ValueError): func(**inputs)"
-    ],
-    "provider": "mock"
-  },
-  {
-    "id": "90cc3fc46ec9",
-    "target": "normalize",
-    "kind": "normal",
-    "description": "Typical call to normalize with nominal inputs.",
-    "inputs": {
-      "values": 1
-    },
-    "expected": "Returns the expected nominal result.",
+    "expected": "Returns 1.",
     "assertions": [
       "result == 1"
     ],
     "provider": "mock"
   },
   {
-    "id": "adb8e62dced0",
+    "id": "40e12e94c9dd",
+    "target": "first",
+    "kind": "boundary",
+    "description": "Boundary input for first (zero / empty edge).",
+    "inputs": {
+      "items": [
+        1
+      ]
+    },
+    "expected": "Returns 1.",
+    "assertions": [
+      "result == 1"
+    ],
+    "provider": "mock"
+  },
+  {
+    "id": "ebf2384ec713",
+    "target": "first",
+    "kind": "exception",
+    "description": "Invalid input raises for first. (raised TypeError).",
+    "inputs": {
+      "items": 5
+    },
+    "expected": "Raises TypeError.",
+    "assertions": [],
+    "provider": "mock"
+  },
+  {
+    "id": "f2ac451c23c5",
+    "target": "normalize",
+    "kind": "normal",
+    "description": "Typical call to normalize with nominal inputs.",
+    "inputs": {
+      "values": [
+        1,
+        2,
+        3
+      ]
+    },
+    "expected": "Returns [0.0, 0.5, 1.0].",
+    "assertions": [
+      "result == [0.0, 0.5, 1.0]"
+    ],
+    "provider": "mock"
+  },
+  {
+    "id": "f344cfb49a9a",
     "target": "normalize",
     "kind": "boundary",
     "description": "Boundary input for normalize (zero / empty edge).",
     "inputs": {
-      "values": 0
+      "values": [
+        1
+      ]
     },
-    "expected": "Handles the boundary without error.",
+    "expected": "Returns [0.0].",
     "assertions": [
-      "result is not None"
+      "result == [0.0]"
     ],
     "provider": "mock"
   },
   {
-    "id": "4a1bc17aa2ea",
+    "id": "976bb6cbed54",
     "target": "normalize",
     "kind": "exception",
-    "description": "Invalid input raises for normalize.",
+    "description": "Invalid input raises for normalize. (raised TypeError).",
     "inputs": {
-      "values": null
+      "values": 5
     },
-    "expected": "Raises ValueError (or equivalent).",
-    "assertions": [
-      "with pytest.raises(ValueError): func(**inputs)"
-    ],
-    "provider": "mock"
-  },
-  {
-    "id": "0eb5efac1533",
-    "target": "normalize",
-    "kind": "normal",
-    "description": "Variant 1 of normalize.",
-    "inputs": {
-      "values": 2
-    },
-    "expected": "Returns a consistent result for the variant.",
-    "assertions": [
-      "result is not None"
-    ],
-    "provider": "mock"
-  },
-  {
-    "id": "6866e3cb0aed",
-    "target": "normalize",
-    "kind": "normal",
-    "description": "Variant 2 of normalize.",
-    "inputs": {
-      "values": 3
-    },
-    "expected": "Returns a consistent result for the variant.",
-    "assertions": [
-      "result is not None"
-    ],
+    "expected": "Raises TypeError.",
+    "assertions": [],
     "provider": "mock"
   }
 ]

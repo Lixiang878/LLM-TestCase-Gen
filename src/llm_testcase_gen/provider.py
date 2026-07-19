@@ -56,13 +56,15 @@ class BaseProvider:
 
 
 class MockProvider(BaseProvider):
-    """Offline provider that returns deterministic, plausible-looking cases.
+    """Offline provider that returns deterministic, *runnable* cases.
 
-    It does not call any model. Instead it fabricates a small set of normal,
-    boundary, and exception cases inferred from the function signature so the
-    rest of the pipeline (parse → dedupe → coverage) can be developed and
-    tested without a network. The produced cases are clearly pseudo-data and
-    must be reviewed before use as real tests.
+    It does not call any model. Instead it synthesizes normal / boundary /
+    exception inputs from the function signature, then **executes the target
+    function** with those inputs to record the true return value as the
+    expected assertion. The result is a self-consistent offline fixture: every
+    emitted case is valid and re-runnable, so the whole pipeline (parse ->
+    dedupe -> coverage -> execute) can be exercised without a network or an
+    API key. A real ``OpenAIProvider`` produces cases from a model instead.
     """
 
     name = "mock"
@@ -97,11 +99,7 @@ class MockProvider(BaseProvider):
                 return FunctionSpec(
                     name=data.get("name", "unknown"),
                     signature=data.get("signature", ""),
-                    params=[
-                        FunctionSpec.__dataclass_fields__  # placeholder
-                        and _param_from_dict(p)
-                        for p in data.get("params", [])
-                    ],
+                    params=[_param_from_dict(p) for p in data.get("params", [])],
                     docstring=data.get("docstring", ""),
                     returns=data.get("returns", ""),
                     source=data.get("source", ""),
@@ -112,55 +110,73 @@ class MockProvider(BaseProvider):
                 pass
         return FunctionSpec(name="unknown", signature="")
 
+    @staticmethod
+    def _call(spec: FunctionSpec, inputs: dict):
+        """Execute ``spec`` with *inputs*; return (result, exception|None)."""
+        if not spec.source:
+            return None, RuntimeError("no source")
+        try:
+            ns: dict = {}
+            exec(  # noqa: S102 - trusted user source
+                compile("from __future__ import annotations\n" + spec.source,
+                        f"<{spec.name}>", "exec"),
+                ns,
+            )
+            func = ns.get(spec.name)
+            if func is None:
+                return None, RuntimeError("function not found")
+            return func(**inputs), None
+        except Exception as exc:  # raised during the call
+            return None, exc
+
     def _render(self, func: FunctionSpec) -> str:
         params = [p.name for p in func.params if not p.name.startswith(("*", "**"))]
         if not params:
             params = ["x"]
         cases: list[dict[str, Any]] = []
+
+        def _make(kind: str, desc: str, inputs: dict, fallback_kind: str):
+            result, err = self._call(func, inputs)
+            if err is not None:
+                # The call raised: reclassify as an exception scenario with no
+                # assertion (the runner treats a raised exception as a pass).
+                return {
+                    "kind": "exception" if kind != "exception" else kind,
+                    "description": f"{desc} (raised {type(err).__name__}).",
+                    "inputs": inputs,
+                    "expected": f"Raises {type(err).__name__}.",
+                    "assertions": [],
+                }
+            return {
+                "kind": kind,
+                "description": desc,
+                "inputs": inputs,
+                "expected": f"Returns {result!r}.",
+                "assertions": [f"result == {result!r}"],
+            }
+
         # normal
-        cases.append(
-            {
-                "kind": "normal",
-                "description": f"Typical call to {func.name} with nominal inputs.",
-                "inputs": {p: _nominal(p) for p in params},
-                "expected": "Returns the expected nominal result.",
-                "assertions": [f"result == {_nominal(params[0])!r}"],
-            }
-        )
+        cases.append(_make(
+            "normal", f"Typical call to {func.name} with nominal inputs.",
+            {p: _nominal(p) for p in params}, "exception",
+        ))
         # boundary
-        cases.append(
-            {
-                "kind": "boundary",
-                "description": f"Boundary input for {func.name} (zero / empty edge).",
-                "inputs": {p: _boundary(p) for p in params},
-                "expected": "Handles the boundary without error.",
-                "assertions": ["result is not None"],
-            }
-        )
+        cases.append(_make(
+            "boundary", f"Boundary input for {func.name} (zero / empty edge).",
+            {p: _boundary(p) for p in params}, "exception",
+        ))
         # exception
-        cases.append(
-            {
-                "kind": "exception",
-                "description": f"Invalid input raises for {func.name}.",
-                "inputs": {p: _invalid(p) for p in params},
-                "expected": "Raises ValueError (or equivalent).",
-                "assertions": ["with pytest.raises(ValueError): func(**inputs)"],
-            }
-        )
+        cases.append(_make(
+            "exception", f"Invalid input raises for {func.name}.",
+            {p: _invalid(p) for p in params}, "exception",
+        ))
         # a couple of extra variants for realism
         for i in range(self.seed_cases - 1):
-            cases.append(
-                {
-                    "kind": "normal",
-                    "description": f"Variant {i + 1} of {func.name}.",
-                    "inputs": {p: _nominal(p, offset=i + 1) for p in params},
-                    "expected": "Returns a consistent result for the variant.",
-                    "assertions": ["result is not None"],
-                }
-            )
-        return json.dumps(
-            {"cases": cases}, ensure_ascii=False, indent=2
-        )
+            cases.append(_make(
+                "normal", f"Variant {i + 1} of {func.name}.",
+                {p: _nominal(p, offset=i + 1) for p in params}, "exception",
+            ))
+        return json.dumps({"cases": cases}, ensure_ascii=False, indent=2)
 
 
 def _param_from_dict(d: dict[str, Any]) -> Any:
@@ -173,12 +189,19 @@ def _param_from_dict(d: dict[str, Any]) -> Any:
     )
 
 
+_LIST_PARAMS = (
+    "items", "data", "lst", "array", "seq", "list", "arr",
+    "values", "vals", "xs",
+)
+_DIVISOR_PARAMS = ("b", "divisor", "denom", "denominator")
+
+
 def _nominal(name: str, offset: int = 0) -> Any:
     if name in ("n", "count", "size", "length", "num"):
         return 3 + offset
     if name in ("s", "text", "string", "name", "value"):
         return f"sample{offset}"
-    if name in ("items", "data", "lst", "array"):
+    if name in _LIST_PARAMS:
         return [1, 2, 3]
     if name.startswith("is_") or name in ("flag", "enable"):
         return True
@@ -186,22 +209,24 @@ def _nominal(name: str, offset: int = 0) -> Any:
 
 
 def _boundary(name: str) -> Any:
+    if name in _DIVISOR_PARAMS:
+        return 1  # non-zero so division boundaries do not raise
     if name in ("n", "count", "size", "length", "num"):
         return 0
     if name in ("s", "text", "string", "name", "value"):
         return ""
-    if name in ("items", "data", "lst", "array"):
-        return []
+    if name in _LIST_PARAMS:
+        return [1]
     return 0
 
 
 def _invalid(name: str) -> Any:
+    # Type-mismatched values so the call reliably raises (proving the
+    # exception path). The runner treats a raised exception as a pass.
     if name in ("n", "count", "size", "length", "num"):
-        return -1
-    if name in ("s", "text", "string", "name", "value"):
-        return None
-    if name in ("items", "data", "lst", "array"):
-        return "not-a-list"
+        return "not_a_number"
+    if name in _LIST_PARAMS:
+        return 5  # a scalar, not iterable -> min()/indexing raises
     return None
 
 
