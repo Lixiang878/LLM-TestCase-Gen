@@ -1,0 +1,11 @@
+{
+  "provider": "mock",
+  "model": "gpt-4o-mini",
+  "base_url": null,
+  "strategies": ["normal", "boundary", "exception"],
+  "cases_per_strategy": 3,
+  "temperature": 0.7,
+  "max_tokens": 1024,
+  "dedup": true,
+  "extra_instructions": "Prefer realistic, runnable inputs. Keep assertions short."
+}
