@@ -27,4 +27,5 @@ env/
 
 # Generated artifacts
 cases*.json
-results/
+results/*
+!results/coverage_report.txt

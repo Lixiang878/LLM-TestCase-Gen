@@ -54,8 +54,11 @@ class TestCase:
     provider: str = "unknown"
     raw: str = ""
 
-    def to_dict(self) -> dict[str, Any]:
-        return asdict(self)
+    def to_dict(self, exclude_raw: bool = True) -> dict[str, Any]:
+        d = asdict(self)
+        if exclude_raw:
+            d.pop("raw", None)
+        return d
 
     @classmethod
     def from_dict(cls, d: dict[str, Any]) -> "TestCase":

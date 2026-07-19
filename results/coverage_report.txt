@@ -1,0 +1,16 @@
+====================================================
+  LLM Test-Case Generation — Coverage Report
+====================================================
+  Total cases      : 18
+  Functions covered : 4
+  Normal            : 10
+  Boundary          : 4
+  Exception         : 4
+  Coverage score    : 100%
+----------------------------------------------------
+  Per function:
+    divide                   n= 3 b= 1 e= 1  missing=none
+    clamp                    n= 3 b= 1 e= 1  missing=none
+    first                    n= 1 b= 1 e= 1  missing=none
+    normalize                n= 3 b= 1 e= 1  missing=none
+====================================================

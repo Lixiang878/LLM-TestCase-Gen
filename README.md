@@ -63,6 +63,47 @@ llm-testcase-gen report cases.json
 llm-testcase-gen dedupe cases.json -o cases.dedup.json
 ```
 
+### Example output
+
+`llm-testcase-gen demo` on `examples/sample_math.py` generates 18 cases
+(10 normal, 4 boundary, 4 exception) and reports:
+
+```text
+====================================================
+  LLM Test-Case Generation — Coverage Report
+====================================================
+  Total cases      : 18
+  Functions covered : 4
+  Normal            : 10
+  Boundary          : 4
+  Exception         : 4
+  Coverage score    : 100%
+----------------------------------------------------
+  Per function:
+    divide                   n= 3 b= 1 e= 1  missing=none
+    clamp                    n= 3 b= 1 e= 1  missing=none
+    first                    n= 1 b= 1 e= 1  missing=none
+    normalize                n= 3 b= 1 e= 1  missing=none
+====================================================
+```
+
+A generated case looks like:
+
+```json
+{
+  "id": "7f3...",
+  "target": "divide",
+  "kind": "exception",
+  "description": "Division by zero.",
+  "inputs": {"a": 1, "b": 0},
+  "expected": "Raises ZeroDivisionError.",
+  "assertions": ["with pytest.raises(ZeroDivisionError): divide(1, 0)"],
+  "provider": "mock"
+}
+```
+
+See `examples/generated_cases.json` and `results/coverage_report.txt`.
+
 ### With a real LLM
 
 ```bash
@@ -161,6 +202,31 @@ llm-testcase-gen demo
 llm-testcase-gen gen -f examples/sample_math.py --provider mock --dedup -o cases.json
 llm-testcase-gen report cases.json
 ```
+
+### 示例输出
+
+`llm-testcase-gen demo` 在 `examples/sample_math.py` 上生成 18 条用例（10 正常、4 边界、4 异常），覆盖率报告如下：
+
+```text
+====================================================
+  LLM Test-Case Generation — Coverage Report
+====================================================
+  Total cases      : 18
+  Functions covered : 4
+  Normal            : 10
+  Boundary          : 4
+  Exception         : 4
+  Coverage score    : 100%
+----------------------------------------------------
+  Per function:
+    divide                   n= 3 b= 1 e= 1  missing=none
+    clamp                    n= 3 b= 1 e= 1  missing=none
+    first                    n= 1 b= 1 e= 1  missing=none
+    normalize                n= 3 b= 1 e= 1  missing=none
+====================================================
+```
+
+完整生成结果见 `examples/generated_cases.json`，完整报告见 `results/coverage_report.txt`。
 
 ### 使用真实大模型
 

@@ -90,7 +90,7 @@ def cmd_demo(args: argparse.Namespace) -> int:
         sys.exit(f"[error] sample not found: {sample}")
     provider = get_provider("mock")
     specs = parse_file(sample)
-    specs = [s for s in specs if s.name in ("divide", "clamp", "first")] or specs
+    specs = [s for s in specs if s.name in ("divide", "clamp", "first", "normalize")] or specs
     all_cases: list[TestCase] = []
     for spec in specs:
         all_cases.extend(
