@@ -39,9 +39,9 @@ dev = ["pytest>=7.0", "ruff>=0.4"]
 llm-testcase-gen = "llm_testcase_gen.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/Lixiang878/llm-testcase-gen"
-Repository = "https://github.com/Lixiang878/llm-testcase-gen"
-Issues = "https://github.com/Lixiang878/llm-testcase-gen/issues"
+Homepage = "https://github.com/Lixiang878/LLM-TestCase-Gen"
+Repository = "https://github.com/Lixiang878/LLM-TestCase-Gen"
+Issues = "https://github.com/Lixiang878/LLM-TestCase-Gen/issues"
 
 [tool.setuptools.packages.find]
 where = ["src"]

@@ -7,8 +7,8 @@ improvements.
 ## Development setup
 
 ```bash
-git clone https://github.com/Lixiang878/llm-testcase-gen.git
-cd llm-testcase-gen
+git clone https://github.com/Lixiang878/LLM-TestCase-Gen.git
+cd LLM-TestCase-Gen
 pip install -e ".[dev]"
 pytest -q
 ```

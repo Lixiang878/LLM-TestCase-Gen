@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 FROM python:3.11-slim
 
-LABEL org.opencontainers.image.source="https://github.com/Lixiang878/llm-testcase-gen"
+LABEL org.opencontainers.image.source="https://github.com/Lixiang878/LLM-TestCase-Gen"
 LABEL org.opencontainers.image.description="LLM-powered unit-test generator that executes what it generates"
 
 WORKDIR /app
