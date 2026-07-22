@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "LLM-TestCase-Gen: LLM-Powered Unit Test Generator with Execution Verification"
+authors:
+  - family-names: Li
+    given-names: Xiang
+type: software
+version: 1.0.0
+date-released: "2026-07-22"
+license: MIT
+repository-code: "https://github.com/Lixiang878/LLM-TestCase-Gen"
+keywords:
+  - llm
+  - unit-testing
+  - test-generation
+  - code-quality
+abstract: "LLM-powered unit-test generator that actually executes what it generates (sandboxed run against the real function). Zero core dependencies, fully offline testable."
