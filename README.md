@@ -18,6 +18,7 @@ case against the real function** → report pass/fail and coverage.
   <img src="https://img.shields.io/badge/dependencies-zero%20core%20(stdlib)-brightgreen.svg" alt="Zero core deps">
   <img src="https://img.shields.io/badge/tests-17%20passing-brightgreen.svg" alt="Tests">
   <img src="https://img.shields.io/badge/license-MIT-yellow.svg" alt="License">
+  <img src="https://github.com/Lixiang878/LLM-TestCase-Gen/actions/workflows/ci.yml/badge.svg" alt="CI">
 </p>
 
 <a id="english"></a>
