@@ -31,7 +31,9 @@ _SAFE_BUILTINS = {
     "abs": abs, "min": min, "max": max, "round": round, "len": len,
     "float": float, "int": int, "str": str, "bool": bool, "sum": sum,
     "any": any, "all": all, "isinstance": isinstance, "type": type,
-    "True": True, "False": False, "None": None, "math": math,
+    "sorted": sorted, "list": list, "dict": dict, "tuple": tuple,
+    "set": set, "range": range, "zip": zip, "enumerate": enumerate,
+    "repr": repr, "True": True, "False": False, "None": None, "math": math,
 }
 
 
@@ -157,8 +159,11 @@ def run_cases(spec: FunctionSpec, cases: Iterable[TestCase]) -> RunResult:
                 )
                 continue
 
-            ns = {"__builtins__": _SAFE_BUILTINS, "result": result_val}
+            ns = {"__builtins__": _SAFE_BUILTINS}
             ns.update({k: v for k, v in (case.inputs or {}).items()})
+            # Keep `result` pointing at the return value even if an input
+            # parameter happens to be named "result" (assertions reference it).
+            ns["result"] = result_val
             assertions = case.assertions or []
             if not assertions:
                 detail = "no assertions (call succeeded)"

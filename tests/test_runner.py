@@ -90,3 +90,50 @@ def test_dedupe_similar_keeps_distinct():
     unique, removed = dedupe_similar([a, b], threshold=0.8)
     assert len(unique) == 2
     assert removed == []
+
+
+def test_case_id_distinguishes_assertions():
+    # Bug guard: same input but different assertions must NOT collapse to one
+    # id (that previously caused export_pytest_module to overwrite cases).
+    a = _case("foo", "normal", {"x": 1}, ["result == 1"])
+    b = _case("foo", "normal", {"x": 1}, ["result == 2"])
+    assert a.id != b.id
+    assert a.canonical_key() != b.canonical_key()
+
+
+def test_export_pytest_keeps_distinct_assertion_cases(tmp_path):
+    spec = parse_source(_SRC)[0]
+    cases = [
+        _case("divide", "normal", {"a": 6, "b": 3}, ["result == 2"]),
+        _case("divide", "normal", {"a": 6, "b": 3}, ["result == 6 / 3"]),
+    ]
+    out = tmp_path / "test_gen.py"
+    export_pytest(spec, cases, out)
+    names = [ln for ln in out.read_text(encoding="utf-8").splitlines()
+             if ln.startswith("def test_divide_")]
+    assert len(names) == 2
+    assert names[0] != names[1]
+
+
+def test_runner_sandbox_exposes_builtins():
+    src = '''
+def ordered(xs):
+    return sorted(xs)
+'''
+    spec = parse_source(src)[0]
+    cases = [_case("ordered", "normal", {"xs": [3, 1, 2]}, ["result == [1, 2, 3]"])]
+    run = run_cases(spec, cases)
+    assert run.passed == 1
+
+
+def test_runner_does_not_shadow_result_with_input():
+    # A parameter literal named "result" must not clobber the return value in
+    # the assertion namespace.
+    src = '''
+def add(result, b):
+    return result + b
+'''
+    spec = parse_source(src)[0]
+    cases = [_case("add", "normal", {"result": 2, "b": 3}, ["result == 5"])]
+    run = run_cases(spec, cases)
+    assert run.passed == 1

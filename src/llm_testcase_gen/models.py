@@ -68,9 +68,19 @@ class TestCase:
         kind = d.get("kind", "normal")
         description = d.get("description", "")
         inputs = d.get("inputs", {}) or {}
-        # Deterministic id from content so identical cases collide.
+        # Deterministic id from content so identical cases collide. Includes
+        # the expected value and assertions: two cases sharing the same input
+        # but checking different behaviour must NOT collapse into one id
+        # (that would also make export_pytest_module overwrite one with the
+        # other, and would merge distinct checks during de-duplication).
         fingerprint = json.dumps(
-            {"target": target, "kind": kind, "inputs": inputs},
+            {
+                "target": target,
+                "kind": kind,
+                "inputs": inputs,
+                "expected": d.get("expected", ""),
+                "assertions": list(d.get("assertions", [])),
+            },
             sort_keys=True,
             ensure_ascii=False,
         ).encode("utf-8")
@@ -88,7 +98,13 @@ class TestCase:
         )
 
     def canonical_key(self) -> str:
-        """Stable key for de-duplication (ignores id/description/assertions)."""
+        """Stable key for de-duplication.
+
+        Two cases are considered duplicates only when they share the same
+        target, kind, inputs, expected value AND assertions — i.e. they check
+        exactly the same behaviour. Cases that differ in what they assert are
+        kept distinct.
+        """
 
         def _norm(v: Any) -> Any:
             if isinstance(v, dict):
@@ -100,7 +116,13 @@ class TestCase:
             return v
 
         payload = json.dumps(
-            {"target": self.target, "kind": self.kind, "inputs": _norm(self.inputs)},
+            {
+                "target": self.target,
+                "kind": self.kind,
+                "inputs": _norm(self.inputs),
+                "expected": self.expected,
+                "assertions": _norm(self.assertions),
+            },
             sort_keys=True,
             ensure_ascii=False,
         )

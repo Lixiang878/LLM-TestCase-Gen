@@ -8,8 +8,9 @@ WORKDIR /app
 
 COPY . /app
 
-# Offline core install: numpy only. A real LLM provider (OpenAI/Anthropic/...)
-# is OPTIONAL and lazy-imported; the bundled MockProvider runs with zero network.
+# Offline core install: zero core dependencies (Python stdlib only). A real
+# LLM provider (OpenAI/Anthropic/...) is OPTIONAL and lazy-imported; the bundled
+# MockProvider runs with zero network.
 RUN pip install --no-cache-dir --upgrade pip \
     && pip install --no-cache-dir -e . \
     && pip install --no-cache-dir pytest
